@@ -1,0 +1,89 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  9
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+application     simpleFoam;
+
+startFrom       latestTime;  // firstTime, startTime, latestTime
+
+startTime       0;
+
+stopAt          endTime;    // endTime, writeNow, noWriteNow, nextWrite
+
+endTime         2000.0;
+
+deltaT          1.0;
+
+writeControl    timeStep;   // timeStep, runTime, adjustableRunTime, cpuTime, clockTime
+
+writeInterval   200;
+
+purgeWrite      0;
+
+writeFormat     ascii;
+
+writePrecision  6;
+
+writeCompression off;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable true;
+
+functions
+{
+    forces
+    {
+        type            forceCoeffs;
+        libs            ("libforces.so");
+        writeControl    writeTime;
+        writeFields     yes;
+
+        patches         (ahmed_body);
+        lRef            1.044;
+        Aref            0.112;
+
+        magUInf         40;
+        rho             rhoInf;
+        rhoInf          1;
+
+        CofR            (0.607 0 0);
+        liftDir         (0 0 1);
+        dragDir         (1 0 0);
+        pitchAxis       (0 1 0);
+    }
+
+    vorticity
+    {
+        type        vorticity;
+        libs        ("libfieldFunctionObjects.so");
+
+        executeControl  writeTime;
+        writeControl    writeTime;
+    }
+
+    yPlus
+    {
+        type            yPlus;
+        libs            ("libfieldFunctionObjects.so");
+
+        executeControl  writeTime;
+        writeControl    writeTime;
+    }
+}
+
+// ************************************************************************* //

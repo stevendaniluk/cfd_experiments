@@ -1,0 +1,13 @@
+**.DS_Store
+
+**.OpenFOAM
+
+# Mesh and solution artifacts
+**/constant/polyMesh
+**/constant/extendedFeatureEdgeMesh
+**/*.eMesh
+**/dynamicCode
+**/postProcessing
+**/[1-9]*
+**/processor*
+**/log.*

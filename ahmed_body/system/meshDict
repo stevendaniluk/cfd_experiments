@@ -1,0 +1,110 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                |
+| \\      /  F ield         | cfMesh: A library for mesh generation          |
+|  \\    /   O peration     |                                                |
+|   \\  /    A nd           | Author: Franjo Juretic                         |
+|    \\/     M anipulation  | E-mail: franjo.juretic@c-fields.com            |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version   2.0;
+    format    ascii;
+    class     dictionary;
+    location  "system";
+    object    meshDict;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+//////////////////////
+// Required fields
+//////////////////////
+
+// Geometry filename
+surfaceFile "constant/geometry/ahmed_body_25_deg_combined.fms";
+
+// Global option for the maximum allowed cell size
+maxCellSize 0.030;
+
+//////////////////////
+// Optional fields
+//////////////////////
+
+// Control which stages of the workflow are executed, and which stage to start from
+workflowControls
+{
+
+    // Which step to stop after. Options are:
+    // - templateGeneration
+    // - surfaceTopology
+    // - surfaceProjection
+    // - patchAssignment
+    // - edgeExtraction
+    // - boundaryLayerGeneration
+    // - meshOptimisation
+    // - boundaryLayerRefinement
+    // stopAfter boundaryLayerRefinement
+
+    // Reads the mesh from disk and restarts the meshing process after the last step {0, 1}
+    restartFromLatestStep 0;
+}
+
+// Global option for the minimum allowed cell size during refinement
+// minCellSize 0.05;
+
+// localRefinement
+// {
+//     ahmed_body
+//     {
+//         // Can specify the cell size at this boundary, OR the number or refinements to the
+//         // maxCellSize to make
+//         cellSize 0.020;
+//         // additionalRefinementLevels 2;
+//
+//         // Thickness of the refinement region away from the patch
+//         refinementThickness 0.20;
+//     }
+//     ahmed_body
+//     {
+//         // Can specify the cell size at this boundary, OR the number or refinements to the
+//         // maxCellSize to make
+//         cellSize 0.010;
+//         // additionalRefinementLevels 2;
+//
+//         // Thickness of the refinement region away from the patch
+//         refinementThickness 0.05;
+//     }
+// }
+
+objectRefinements
+{
+    BoxROI
+    {
+        cellSize    0.010;
+
+        type        box;
+        centre      (0.0 0.0 0.20);
+        lengthX     2.20;
+        lengthY     0.60;
+        lengthZ     0.40;
+    }
+}
+
+// Refinement regions extruded from boundary faces towards the interior
+boundaryLayers
+{
+   patchBoundaryLayers
+   {
+       ahmed_body
+       {
+           nLayers 5;
+           thicknessRatio 1.25;
+           // maxFirstLayerThickness 0.01;
+       }
+   }
+
+      // Activate smoothing of the boundary layers (deactivated by default)
+      optimiseLayer 1;
+}
+
+// ************************************************************************* //

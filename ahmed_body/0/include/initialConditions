@@ -1,0 +1,19 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  9
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+
+U_inf 40;
+pressure 0;
+
+// Turbulence properties
+T_i 0.01;
+T_l 5e-6;
+turbulent_KE #calc "1.5 * pow($U_inf*$T_i, 2)";
+turbulent_epsilon #calc "pow(0.09, 0.75) * pow($turbulent_KE, 1.5) / $T_l";
+turbulent_omega #calc "$turbulent_epsilon / $turbulent_KE";
+
+// ************************************************************************* //
