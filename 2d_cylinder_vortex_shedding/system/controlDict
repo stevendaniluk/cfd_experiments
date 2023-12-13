@@ -1,0 +1,96 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  11
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include        "$FOAM_CASE/include/initialConditions"
+
+application     foamRun;
+
+solver          incompressibleFluid;
+
+startFrom       latestTime;  // firstTime, startTime, latestTime
+
+startTime       0;
+
+stopAt          endTime;    // endTime, writeNow, noWriteNow, nextWrite
+
+endTime         $t_end;
+
+deltaT          $dt;
+
+writeControl    runTime;   // timeStep, runTime, adjustableRunTime, cpuTime, clockTime
+
+writeInterval   $dt_write;
+
+purgeWrite      0;
+
+writeFormat     ascii;
+
+writePrecision  6;
+
+writeCompression off;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable true;
+
+functions
+{
+    forces
+    {
+        type            forceCoeffs;
+        libs            ("libforces.so");
+        writeControl    runTime; // timeStep, runTime, writeTime, adjustableRunTime, cpuTime, clockTime, onEnd
+        writeInterval   $dt_force_write;
+        writeFields     yes;
+
+        patches         (body);
+        lRef            $cylinder_dia;
+        Aref            $cylinder_dia;
+
+        rhoInf          1.0;
+        rho             rhoInf;
+        magUInf         $U_inf
+
+        CofR            (0 0 0.5);
+        liftDir         (0 1 0);
+        dragDir         (1 0 0);
+        pitchAxis       (0 1 0);
+
+        origin  (0 0 0);
+        coordinateRotation
+        {
+            type    axesRotation;
+            e1  (1 0 0);
+            e2  (0 1 0);
+        }
+    }
+
+    // courant
+    // {
+    //     type            CourantNo;
+    //     libs            ("libfieldFunctionObjects.so");
+    //
+    //     phi             phi;
+    //     field           $phi;
+    //
+    //     executeControl  writeTime;
+    //     writeControl    writeTime;
+    // }
+}
+
+// ************************************************************************* //

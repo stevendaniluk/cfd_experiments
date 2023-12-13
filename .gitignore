@@ -9,5 +9,12 @@
 **/dynamicCode
 **/postProcessing
 **/[1-9]*
+**/0.[1-9]*
+**/0/cellLevel
+**/0/pointLevel
+**/0/Co
 **/processor*
 **/log.*
+**/results
+
+!2d_cylinder_vortex_shedding

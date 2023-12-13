@@ -1,0 +1,26 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  11
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+
+// Configuration parameters
+Re 200;
+transient true;
+
+dt 0.01;
+dt_write 60.0;
+dt_force_write 0.01;
+t_end 60.0;
+
+// Constant parameters
+U_inf 1.0;
+pressure 0;
+cylinder_dia 1.0;
+
+// Derived parameters
+nu #calc "$U_inf * $cylinder_dia / $Re";
+
+// ************************************************************************* //
