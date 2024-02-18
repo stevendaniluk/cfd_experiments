@@ -1,0 +1,85 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  11
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include        "$FOAM_CASE/include/initialConditions"
+
+application     foamRun;
+
+solver          functions;
+
+subSolver       incompressibleFluid;
+
+startFrom       latestTime;  // firstTime, startTime, latestTime
+
+startTime       0;
+
+stopAt          endTime;    // endTime, writeNow, noWriteNow, nextWrite
+
+endTime         $t_end;
+
+deltaT          $dt;
+
+writeControl    runTime;   // timeStep, runTime, adjustableRunTime, cpuTime, clockTime
+
+writeInterval   $dt_write;
+
+purgeWrite      0;
+
+writeFormat     ascii;
+
+writePrecision  6;
+
+writeCompression off;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable true;
+
+functions
+{
+    #includeFunc scalarTransport(s, diffusivity=constant, D=0.0)
+
+    line_sample
+    {
+        type        sets;
+        libs        ("libsampling.so");
+
+        writeControl    runTime;
+        writeInterval   $dt_write;
+
+        interpolationScheme cellPoint;  // Linear weighted interpolation using cell values
+        setFormat   csv;    // raw, gnuplot, csv, vtk
+
+        fields (s);
+
+        sets
+        (
+            line
+            {
+                type    lineUniform;
+                nPoints 201;
+                start   (0.0 1.0 0.5);
+                end     (1.0 0.0 0.5);
+                axis    x;
+            }
+        );
+    }
+
+}
+
+// ************************************************************************* //

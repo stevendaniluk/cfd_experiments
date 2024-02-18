@@ -1,0 +1,13 @@
+Gauss linear
+Gauss upwind
+Gauss linearUpwind grad(U)
+Gauss limitedLinear 0.2
+Gauss limitedLinear 1.0
+Gauss Minmod
+Gauss MUSCL
+Gauss SuperBee
+Gauss vanLeer
+Gauss LUST grad(U)
+Gauss QUICK
+Gauss SFCD
+Gauss UMIST

@@ -1,0 +1,50 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  11
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    format      ascii;
+    class       volVectorField;
+    location    "0";
+    object      U;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include        "$FOAM_CASE/include/initialConditions"
+
+dimensions      [0 1 -1 0 0 0 0];
+
+// Velocity field magnitude and direction
+U_inf #calc "$Co * (1.0 / $cells) / $dt";
+U_x #calc "$U_inf * cos(degToRad($theta))";
+U_y #calc "$U_inf * sin(degToRad($theta))";
+
+internalField   uniform ($U_x $U_y 0);
+
+boundaryField
+{
+    // Inlet
+    "(X|Y)_min"
+    {
+        type            fixedValue;
+        value           $internalField;
+    }
+
+    // Outlet
+    "(X|Y)_max"
+    {
+        type            zeroGradient;
+    }
+
+    "(Z_min|Z_max)"
+    {
+        type            empty;
+    }
+
+}
+
+// ************************************************************************* //
