@@ -1,0 +1,20 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  11
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+
+// Configuration parameters
+cells 50;
+div(phi,s) Gauss limitedLinear 0.2;
+Co 0.25;
+theta 45.0;
+
+// Time step parameters
+dt 0.0005;
+dt_write 1.0;
+t_end 1.0;
+
+// ************************************************************************* //
