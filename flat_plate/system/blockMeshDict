@@ -1,0 +1,143 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  11
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include        "$FOAM_CASE/include/initialConditions"
+
+convertToMeters 1;
+
+// Domain size
+x_min  0.0;
+x_max  $domain_L;
+y_min  0.0;
+y_max  $plate_L;
+z_min  0.0;
+z_max  1.0;
+
+// The mesh consists of two regions in each dimensions: a uniform grid, and a refined
+// region. The uniform cell size, refined region height, and initial layer height
+// are all specified.
+//
+// Need to determine the following parameters for grading settings:
+//   - Number of cells in the uniform and refined areas
+//   - The expansion rate in the refined area
+//
+// Formulas for cell count are taken from:
+// https://www.cfd-online.com/Forums/openfoam-meshing/165146-about-simple-grading-blockmesh.html
+
+// X direction grading calculations
+n_cells_graded_x #calc "2.0 + floor(log($dx_uniform_cell / $dx_first_cell) / log(($grade_thickness_x - $dx_first_cell) / ($grade_thickness_x - $dx_uniform_cell)))";
+n_cells_uniform_x #calc "round(($x_max - $grade_thickness_x) / $dx_uniform_cell)";
+n_cells_x #calc "$n_cells_graded_x + $n_cells_uniform_x";
+grading_expansion_x #calc "$dx_uniform_cell / $dx_first_cell";
+
+// Y direction grading calculations
+n_cells_graded_y #calc "2.0 + floor(log($dy_uniform_cell / $dy_first_cell) / log(($grade_thickness_y - $dy_first_cell) / ($grade_thickness_y - $dy_uniform_cell)))";
+n_cells_uniform_y #calc "round(($y_max - $grade_thickness_y) / $dy_uniform_cell)";
+n_cells_y #calc "$n_cells_graded_y + $n_cells_uniform_y";
+grading_expansion_y #calc "$dy_uniform_cell / $dy_first_cell";
+
+n_cells_z 1;
+
+vertices
+(
+    ($x_min  $y_min  $z_min)
+    ($x_max  $y_min  $z_min)
+    ($x_max  $y_max  $z_min)
+    ($x_min  $y_max  $z_min)
+    ($x_min  $y_min  $z_max)
+    ($x_max  $y_min  $z_max)
+    ($x_max  $y_max  $z_max)
+    ($x_min  $y_max  $z_max)
+);
+
+blocks
+(
+    hex (0 1 2 3 4 5 6 7) ($n_cells_x $n_cells_y $n_cells_z)
+    simpleGrading
+    (
+        (
+            ($grade_thickness_x $n_cells_graded_x $grading_expansion_x)
+            (#calc "$x_max - $grade_thickness_x" $n_cells_uniform_x 1.0)
+        )
+        (
+            ($grade_thickness_y $n_cells_graded_y $grading_expansion_y)
+            (#calc "$y_max - $grade_thickness_y" $n_cells_uniform_y 1.0)
+        )
+        1
+    )
+);
+
+edges
+(
+);
+
+boundary
+(
+    X_min
+    {
+        type patch;
+        faces
+        (
+            (0 4 7 3)
+        );
+    }
+    X_max
+    {
+        type patch;
+        faces
+        (
+            (2 6 5 1)
+        );
+    }
+    Y_min
+    {
+        type wall;
+        faces
+        (
+            (0 1 5 4)
+        );
+    }
+    Y_max
+    {
+        type symmetryPlane;
+        faces
+        (
+            (3 7 6 2)
+        );
+    }
+    Z_min
+    {
+        type empty;
+        faces
+        (
+            (0 3 2 1)
+        );
+    }
+    Z_max
+    {
+        type empty;
+        faces
+        (
+            (4 5 6 7)
+        );
+    }
+);
+
+mergePatchPairs
+(
+);
+
+// ************************************************************************* //

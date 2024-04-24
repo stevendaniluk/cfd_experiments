@@ -1,0 +1,116 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  11
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include        "$FOAM_CASE/include/initialConditions"
+
+application     foamRun;
+
+solver          incompressibleFluid;
+
+startFrom       latestTime;  // firstTime, startTime, latestTime
+
+startTime       0;
+
+stopAt          endTime;    // endTime, writeNow, noWriteNow, nextWrite
+
+endTime         $t_end;
+
+deltaT          $dt;
+
+writeControl    runTime;   // timeStep, runTime, adjustableRunTime, cpuTime, clockTime
+
+writeInterval   1.0;
+
+purgeWrite      0;
+
+writeFormat     ascii;
+
+writePrecision  6;
+
+writeCompression off;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable true;
+
+functions
+{
+    setWriteInterval
+    {
+        type            setWriteInterval;
+        libs            ("libutilityFunctionObjects.so");
+
+        writeInterval table
+        (
+            (0      $dt_first_write)
+            ($dt_first_write    $dt_first_write)
+            (#calc "$dt_first_write + $dt" $dt_write)
+        );
+    }
+
+    #includeFunc yPlus;
+    #includeFunc wallShearStress
+
+    U_profile_sample
+    {
+        type        sets;
+        libs        ("libsampling.so");
+        writeControl    runTime;
+        writeInterval   $dt_write;
+
+        fields (U);
+
+        interpolationScheme cellPoint;
+        setFormat   raw;
+        sets
+        (
+            x1_0
+            {
+                type    lineCell;
+                start   ($plate_L  0.0 $y_plus_sample_h);
+                end     ($plate_L  1.0 $y_plus_sample_h);
+                axis    y;
+            }
+        );
+    }
+
+    wall_shear_sample
+    {
+        type        surfaces;
+        libs        ("libsampling.so");
+        writeControl    runTime;
+        writeInterval   $dt_write;
+
+        fields (wallShearStress);
+
+        interpolationScheme cell;
+        surfaceFormat   raw;
+        surfaces
+        (
+            plate
+            {
+                type        patch;
+                patches     (Y_min);
+                interpolate false;
+                triangulate false;
+            }
+        );
+    }
+}
+
+// ************************************************************************* //

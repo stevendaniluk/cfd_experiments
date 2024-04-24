@@ -1,0 +1,47 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  11
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+
+// Time step and duration settings
+dt 1.0;
+dt_first_write 3000.0;
+dt_write 3000.0;
+t_end 3000.0;
+
+// Flow parameters
+Re 5e6;
+U_inf 1.0;
+pressure 0;
+
+// Turbulence model, intensity, and viscosity ratio
+turb_model kOmegaSST;
+Tu 0.01;
+TVR 0.20;
+
+// Geometry parameters
+domain_L 2.0;
+plate_L 1.0;
+
+dx_uniform_cell 0.05;
+dx_first_cell 1.0e-6;
+grade_thickness_x 0.5;
+
+dy_uniform_cell 0.05;
+dy_first_cell 5.0e-7;
+grade_thickness_y 0.5;
+
+// Post processing parameters
+y_plus_sample_h 0.1;
+
+// Derived parameters
+nu #calc "$U_inf * $plate_L / $Re";
+turb_nut #calc "$TVR * $nu";
+turb_k #calc "1.5 * pow($Tu * $U_inf, 2)";
+turb_omega #calc "$turb_k / ($nu * $TVR)";
+turb_epsilon #calc "0.09 * pow($turb_k, 2) / ($nu * $TVR)";
+
+// ************************************************************************* //

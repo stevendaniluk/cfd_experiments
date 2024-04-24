@@ -13,6 +13,8 @@
 **/0/cellLevel
 **/0/pointLevel
 **/0/Co
+**/0/yPlus
+**/0/uniform
 **/processor*
 **/log.*
 **/results
