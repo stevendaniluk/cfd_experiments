@@ -2,21 +2,21 @@
 
 This is an OpenFOAM simulation for airflow over a 2 dimensional cylinder under various Reynolds numbers with steady state or transient behaviours. Below you can find results for each flow regime, a grid and time dependence study, and other notes about various experiments.
 
-![Re_200_p_vorticity](img/Re_200_p_vorticity.gif)
+![Re_3e3_p_vorticity](img/Re_3e3_p_vorticity.gif)
 
 [OpenFOAM Version 11](https://openfoam.org/version/11/) was used.
 
 [Octave](https://octave.org/) is also used for some data processing.
 
 ## Scenario Overview
-The simulated domain is 50 m long and 40 m wide, with the cylinder 20 m from the front and along the centerline.
+The simulated domain is 65 m long and 30 m wide, with the cylinder 15 m from the front and along the centerline.
 
 **Simulation Properties:**
 * Medium: Air
 * Flow Model: Incompressible
 * Solver: PIMPLE
-* Mesh Cells: 57k
-* Reynolds Numbers: 2, 20, 200
+* Mesh Cells: 110k
+* Reynolds Numbers: 2, 20, 200, 3e3
 
 **Boundary Conditions:**
 
@@ -24,19 +24,22 @@ The simulated domain is 50 m long and 40 m wide, with the cylinder 20 m from the
 |-|-|-|-|-|
 | Pressure | Zero Gradient | 0 [Pa] | Symmetry | Zero Gradient |
 | Velocity | 1.0 m/s | Zero Gradient | Symmetry | No Slip |
+| k | Fixed | Zero Gradient | Symmetry | kqRWallFunction |
+| omega | Fixed | Zero Gradient | Symmetry | omegaWallFunction |
+| nut | Calculated | Calculated | Symmetry | nutUSpaldingWallFunction |
 
 A freestream velocity of 1.0 m/s was used across all scenarios while kinematic viscosity was varied to achieve target Reynolds numbers.
 
 **Mesh:**  
-* Cells: 57,332
+* Cells: 110k
 * Background cell size: 0.5 m
-* Refinement levels: 4
-* Surface layers: 10
-* Smallest cell size: 0.03125 m (assuming square cell)
+* Refinement levels: 5
+* Surface layers: 5
+* Smallest cell size: 0.015625 m (assuming a square cell)
 
 The hexahedral mesh was generated with `snappyHexMesh` using a background mesh generated with `blockMesh` and an STL file of the cylinder (under `constant/geometry`). The resulting 3D mesh was then extruded to 2D using the `extrudeMesh` utility.
 
-The mesh was modelled after the example in *Section 9.12.2* of [1].
+Several refinement regions were added around and behind the cylinder, with each refinement region getting progressively wide and more coarse with increasing distance from the cylinder.
 
 ![mesh_full](img/mesh_full.png)
 
@@ -44,7 +47,7 @@ The mesh was modelled after the example in *Section 9.12.2* of [1].
 
 ![mesh_courant](img/mesh_courant.png)
 
-The final image shows the Courant number in each cell from an Re=200 simulation.
+The final image shows the Courant number in each cell from an Re=3e3 simulation.
 
 See the [Grid and Time Step Dependence](#Grid-and-Time-Step-Dependence) section for an analysis on grid sizing.
 
@@ -54,7 +57,7 @@ See the [Grid and Time Step Dependence](#Grid-and-Time-Step-Dependence) section 
 * Flow: Laminar, steady state
 * Time Step: 1
 * Duration: 1.5e4
-* Cd: 7.255
+* Cd: 7.4850
 
 At Re=2 the flow is creeping and has no separation around the cylinder.
 
@@ -63,8 +66,8 @@ At Re=2 the flow is creeping and has no separation around the cylinder.
 ### Re=20
 * Flow: Laminar, steady state
 * Time Step: 1
-* Duration: 1e4
-* Cd: 2.070
+* Duration: 1.5e4
+* Cd: 2.1015
 
 At Re=20 there begins to be some separation around the trailing half of the cylinder producing two circulation zones directly behind the cylinder. The flow is still symmetrical and non-oscillatory.
 
@@ -72,10 +75,10 @@ At Re=20 there begins to be some separation around the trailing half of the cyli
 
 ### Re=200
 * Flow: Laminar, transient
-* Time Step: 0.01 s
+* Time Step: 0.005 s
 * Duration: 60.0 s
-* Cd: 1.3511 +/-0.0481 (min=1.3030, max=1.3993)
-* Cl: 0.0005 +/-0.7078 (min=-0.7072, max=0.7083)
+* Cd: 1.3565 +/- 0.0465 (min=1.3099, max=1.4030)
+* Cl: 0.0000 +/- 0.6973 (min=-0.6973, max=0.6972)
 
 At Re=200 the flow become oscillatory. The pressure distribution on each side of the cylinder is no longer symmetric, and instead the lowest pressure zone and separation points shift from side to side creating series of trailing vortices known as a vortex street.
 
@@ -83,11 +86,36 @@ Initially the flow will look similar to the Re=20 case (i.e. steady state), but 
 
 The resulting drag and lift coefficients are in close agreement with the values from *Section 9.12.2* of [1]. Although [1] doesn't quote exact values, the plots indicate Cd values in the range [1.302, 1.398] and Cl values in the range [-0.70, 0.70].
 
-The results quoted here are for an *intermediate* mesh and time step size, one that is not prohibitively expensive to compute. See the [Grid and Time Step Dependence](#Grid-and-Time-Step-Dependence) section for results for the Re=200 case with finer mesh and time step sizes.
+The results quoted here are for an *medium* mesh and time step size (see the [Grid and Time Step Dependence](#Grid-and-Time-Step-Dependence) section for grid data)
 
-![Re_200_p_U](img/Re_200_p_U.gif)
+![Re_200_p](img/Re_200_p.png)
+
+![Re_200_U](img/Re_200_U.png)
+
+![Re_200_vorticity](img/Re_200_vorticity.png)
 
 ![force_coeffs_Re_200](img/force_coeffs_Re_200.png)
+
+### Re=3e3
+* Flow: Turbulent, transient
+* Time Step: 0.005 s
+* Duration: 60.0 s
+* Cd: 1.6464 +/- 0.2430 (min=1.4035, max=1.8894)
+* Cl: 0.0048 +/- 1.5818 (min=-1.5770, max=1.5866)
+
+At Re=3e3 the flow behaves similarly to the Re=200 case except the flow is fully turbulent.
+
+![Re_3e3_p](img/Re_3e3_p_U.gif)
+
+![Re_3e3_vorticity](img/Re_3e3_vorticity.png)
+
+![Re_3e3_k](img/Re_3e3_k.png)
+
+![Re_3e3_omega](img/Re_3e3_omega.png)
+
+![Re_3e3_nut](img/Re_3e3_nut.png)
+
+![force_coeffs_Re_3e3](img/force_coeffs_Re_3e3.png)
 
 ## Running The Simulation
 There are a set of scripts under the `scripts` directory for running everything. All scripts accept a `-c` option to clear existing data as well as a `-j <CORES>` option for parallelization. Run any script with the `-h` option for usage.
@@ -118,11 +146,19 @@ The simulation is configured to easily switch between flow regimes by altering t
 The main entries to vary are:
 ```
 // Configuration parameters
-Re 200;
+Re 3e3;
 transient true;
+turbulence true;
 
-dt 0.01;
-dt_write 60.0;
+// Turbulence intensity and viscosity ratio
+Tu 0.01;
+TVR 0.20;
+
+// Time step and write
+dt 0.005;
+dt_first_write 60.0;
+dt_write 0.20;
+dt_force_write $dt;
 t_end 60.0;
 ```
 
@@ -157,59 +193,47 @@ Force Coefficient Results:
     Cl=0.0005 +/-0.7078 (min=-0.7072, max=0.7083)
 ```
 
-To save a batch of results (no mesh or field data):
+To save a batch of results (no data) starting from time point `t=0` (no mesh or field data):
 ```bash
-./scripts/save_results.sh my_experiment
+./scripts/save_results.sh my_experiment 0
 ```
 This will copy plots and log data to a new folder under the `results` directory. Use the `-h` option to see more usage information.
+
+To save all the data and initial conditions for simulation run:
+```bash
+./scripts/save_data.sh my_experiment
+```
 
 ## Additional Details
 
 ### Grid and Time Step Dependence
-Grid and time dependence was analyzed for the Re=200 case, the results of which are below.
+Grid and time dependence was analyzed for the Re=3e3 case, the results of which are below.
 
-The mesh was altered by changing the size of the background mesh cells while performing 4 levels of refinement. Cell sizes quoted here refer to the size after refining the background mesh. Three mesh sizes were considered:
-* Coarse: dx=0.0625, 17k cells
-* Medium: dx=0.03125, 57k cells
-* Fine: dx=0.015625, 209k cells
+The mesh was altered by changing the maximum number of refinement levels. The background mesh cell size was kept at 0.50 m. Cell sizes quoted here refer to the size after refining the background mesh. Four mesh sizes were considered:
+* Extra Coarse: dx=0.0625, 13k cells
+* Coarse: dx=0.0625, 33k cells
+* Medium: dx=0.03125, 110k cells
+* Fine: dx=0.015625, 414k cells
 
-Time steps were varied from the smallest value of 0.00125 seconds and increased as long as the Courant number remained below 2 for that particular mesh size.
+For each mesh size the simulation was run for 60.0 seconds. The time step size was adjust to keep the Courant number constant relative to the medium mesh with a time step size of 0.005 seconds (e.g. for the Coarse mesh the step size was 0.010 seconds).
 
-Process for dependence studies:
+For the time dependence study the medium mesh size was used with varying time step sizes of 4x, 2x, 0.5x, and 0.25x. The simulation process was:
 1. Mesh at desired cell size
-1. Simulate at the largest time step for 60 seconds
-1. Halve the time step, simulate for an additional 20 seconds
-1. Repeat step 3 for all desired time steps
-1. Repeat steps 1-4 for all desired mesh sizes
+1. Simulate at the nominal time step (0.005) for 60 seconds
+1. Scale the time step, simulate for an additional 20 seconds
+1. Evaluate the final 5.0 seconds for force coefficient data
+1. Repeat steps 1-4 for all desired time step sizes
 
 The plot below shows the change in the drag coefficient mean value and amplitude and the lift coefficient amplitude for all mesh and time step combinations.
 
 Key Takeaways:
-* The medium mesh with a time step of 0.01 seconds provides a good compromise between accuracy and computational demand. The error is only ~0.5% compared to the finest mesh and smallest time step size considered.
-* The results appear to vary quadratically with both time step size and mesh size, as expected with second-order discretization schemes
+* The medium mesh with a time step of 0.005 seconds provides a reasonable compromise between accuracy and computational demand.
+* Force coefficients appear to vary in an approximately quadratic fashion with respect to mesh size and time. Although for some settings there is some overshoot.
 * The range of mesh sizes and time step sizes considered seems appropriate, it clearly indicates a convergence towards some final value while the magnitude of difference between configuations is large enough that one can make decisions on how to balance computational cost vs. accuracy (coefficient changes of 0.5 between configurations is not helpful, neither are changes of 1e-5).
 
-![dependence_study](img/dependence_study.png)
+![dependence_study_mesh](img/dependence_study_mesh.png)
 
-The complete data from all runs is below:
-
-| Min Cell Size [m] | Cells | Time Step [s] | Cd | Cl | Co Max |
-|-|-|-|-|-|-|
-| 0.0625 | 17,392 | 0.04 | 1.3533 +/- 0.0514 | 0.0000 +/- 0.7291 | 1.123 |
-| 0.0625 | 17,392 | 0.02 | 1.3372 +/- 0.0455 | 0.0001 +/- 0.6826 | 0.570 |
-| 0.0625 | 17,392 | 0.01 | 1.3274 +/- 0.0415 | 0.0004 +/- 0.6530 | 0.287 |
-| 0.0625 | 17,392 | 0.005 | 1.3218 +/- 0.0393 | 0.0006 +/- 0.6375 | 0.141 |
-| 0.0625 | 17,392 | 0.0025 | 1.3193 +/- 0.0385 | 0.0008 +/- 0.6300 | 0.070 |
-| 0.0625 | 17,392 | 0.00125 | 1.3179 +/- 0.0382 | 0.0004 +/- 0.6257 | 0.035 |
-| 0.03125 | 57,332 | 0.02 | 1.3599 +/- 0.0518 | 0.0001 +/- 0.7344 | 1.222 |
-| 0.03125 | 57,332 | 0.01 | 1.3520 +/- 0.0485 | 0.0001 +/- 0.7093 | 0.618 |
-| 0.03125 | 57,332 | 0.005 | 1.3469 +/- 0.0464 | -0.0004 +/- 0.6947 | 0.303 |
-| 0.03125 | 57,332 | 0.0025 | 1.3442 +/- 0.0453 | -0.0004 +/- 0.6868 | 0.149 |
-| 0.03125 | 57,332 | 0.00125 | 1.3429 +/- 0.0450 | -0.0002 +/- 0.6829 | 0.073 |
-| 0.015625 | 209,268 | 0.01 | 1.3528 +/- 0.0487 | 0.0003 +/- 0.7112 | 1.719 |
-| 0.015625 | 209,268 | 0.005 | 1.3492 +/- 0.0469 | -0.0004 +/- 0.6990 | 0.852 |
-| 0.015625 | 209,268 | 0.0025 | 1.3469 +/- 0.0460 | -0.0002 +/- 0.6917 | 0.406 |
-| 0.015625 | 209,268 | 0.00125 | 1.3456 +/- 0.0454 | 0.0003 +/- 0.6877 | 0.199 |
+![dependence_study_time](img/dependence_study_time.png)
 
 ### Inducing Instability
 When the domain is initialized with a uniform velocity field the flow will eventually become oscillatory, but it can take a while for this to occur.
@@ -225,14 +249,14 @@ Alternate perturbations were experimented with, but a 10 degree upstream rotatio
 ### Compute
 An AMD Ryzen9 3900X CPU (12 cores, 3.8 GHz) was used for all computations. The simulation was parallelized with the domain decomposed into 12 partitions.
 
-Measured computation times for various configurations using the Re=200 case with a time step size of 0.010 s, a duration of 60.0 s, and a single write of data at the end.
+Measured computation times for various configurations using the Re=200 case with a time step size of 0.005 s, a duration of 60.0 s, and a single write of data at the end.
 
-| Min Cell Size [m] | Cells | Mesh Time [s] | Simulation Time [s] |
-|-|-|-|-|
-| 0.125 | 4,426 | 7.8 | 25.2 |
-| 0.0625 | 17,392 | 15.5 | 65.1 |
-| 0.03125 | 57,332 | 45.6 | 251.0 |
-| 0.015625 | 209,268 | 163.8 | 1,552.8 |
+| Mesh | Min Cell Size [m] | Cells | Mesh Time [s] | Simulation Time [s] |
+|-|-|-|-|-|
+| Extra Coarse | 0.0625 | 13k | 4.1 | 89.0 |
+| Coarse | 0.03125 | 33k | 9.3 | 150.6 |
+| Medium | 0.015625 | 110k | 71.8 | 740.8 |
+| Fine | 0.007813 | 414k | 673.1 | 7,853.6 |
 
 ## References
 [1] *Computational Methods for Fluid Dynamics (Fourth Edition)* - J. Ferziger, M. Peric, R. Street.
