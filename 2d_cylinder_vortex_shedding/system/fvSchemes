@@ -40,6 +40,8 @@ gradSchemes
     default         Gauss linear;
 
     grad(U)         cellLimited Gauss linear 1;
+    grad(k)         cellLimited Gauss linear 1;
+    grad(omega)     cellLimited Gauss linear 1;
 }
 
 divSchemes
@@ -50,6 +52,11 @@ divSchemes
         strategy            Gauss limitedLinear 1.0;
 
         div(phi,U)          Gauss limitedLinearV 1.0;
+        div(phi,k)          $strategy;
+        div(phi,omega)      $strategy;
+        div(phi,epsilon)    $strategy;
+
+        div((nuEff*dev2(T(grad(U))))) Gauss linear;
     #else
         div(phi,U)      bounded Gauss limitedLinear 1.0;
     #endif
@@ -68,6 +75,11 @@ interpolationSchemes
 snGradSchemes
 {
     default         corrected;
+}
+
+wallDist
+{
+    method meshWave;
 }
 
 // ************************************************************************* //

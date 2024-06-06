@@ -32,14 +32,14 @@ solvers
         relTol         0;
     }
 
-    U
+    "(U|k|omega|epsilon)"
     {
         solver          smoothSolver;
         smoother        symGaussSeidel;
         tolerance       1e-06;
         relTol          1e-2;
     }
-    UFinal
+    "(U|k|omega|epsilon)Final"
     {
         $U;
         relTol          0;

@@ -8,25 +8,42 @@
 FoamFile
 {
     format      ascii;
-    class       dictionary;
-    location    "constant";
-    object      momentumTransport;
+    class       volScalarField;
+    location    "0";
+    object      nut;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+dimensions      [0 2 -1 0 0 0 0];
+
 #include        "$FOAM_CASE/include/initialConditions"
 
-#if $turbulence
-    simulationType RAS;
-#else
-    simulationType laminar;
-#endif
+internalField   uniform $turb_nut;
 
-RAS
+boundaryField
 {
-    model           kOmegaSST;
-    turbulence      on;
-    printCoeffs     on;
+    // Inlet/Outlet
+    "(X_min|X_max)"
+    {
+        type            calculated;
+        value           $internalField;
+    }
+
+    // Walls
+    "(Y_min|Y_max)"
+    {
+        type            symmetryPlane;
+    }
+    "(Z_min|Z_max)"
+    {
+        type            empty;
+    }
+
+    body
+    {
+        type            nutUSpaldingWallFunction;
+        value           $internalField;
+    }
 }
 
 // ************************************************************************* //

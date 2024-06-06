@@ -41,3 +41,6 @@ mv force_coeffs.png $OUTPUT_DIR/
 
 octave scripts/analyze_force_coeffs.m postProcessing/forces/$T_POINT/forceCoeffs.dat $PLOT_ARGS > $OUTPUT_DIR/force_coeffs_range.txt
 
+# Paraview screenshot
+pyFoamPVSnapshot.py . --state-file turbulence_props.pvsm --latest-time
+mv Snapshot_2d_cylinder_vortex_shedding_*_turbulence_props.png $OUTPUT_DIR/paraview_turbulence_props.png

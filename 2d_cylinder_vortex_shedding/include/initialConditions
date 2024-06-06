@@ -7,9 +7,13 @@
 \*---------------------------------------------------------------------------*/
 
 // Configuration parameters
-Re 200;
+Re 3e3;
 transient true;
+turbulence true;
 
+// Turbulence intensity and viscosity ratio
+Tu 0.01;
+TVR 0.20;
 
 // Time step and write
 dt 0.005;
@@ -30,5 +34,9 @@ cylinder_dia 1.0;
 
 // Derived parameters
 nu #calc "$U_inf * $cylinder_dia / $Re";
+turb_nut #calc "$TVR * $nu";
+turb_k #calc "1.5 * pow($Tu * $U_inf, 2)";
+turb_omega #calc "$turb_k / ($nu * $TVR)";
+turb_epsilon #calc "0.09 * pow($turb_k, 2) / ($nu * $TVR)";
 
 // ************************************************************************* //
