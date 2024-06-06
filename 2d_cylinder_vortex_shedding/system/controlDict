@@ -32,7 +32,7 @@ deltaT          $dt;
 
 writeControl    runTime;   // timeStep, runTime, adjustableRunTime, cpuTime, clockTime
 
-writeInterval   $dt_write;
+writeInterval   1.0;
 
 purgeWrite      0;
 
@@ -50,6 +50,23 @@ runTimeModifiable true;
 
 functions
 {
+    setWriteInterval
+    {
+        type            setWriteInterval;
+        libs            ("libutilityFunctionObjects.so");
+
+        writeInterval table
+        (
+            (0      $dt_first_write)
+            ($dt_first_write    $dt_first_write)
+            (#calc "$dt_first_write + $dt" $dt_write)
+        );
+    }
+
+    #includeFunc yPlus;
+    #includeFunc writeCellVolumes;
+    #includeFunc Q;
+
     forces
     {
         type            forceCoeffs;

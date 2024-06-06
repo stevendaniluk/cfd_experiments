@@ -10,9 +10,12 @@
 Re 200;
 transient true;
 
-dt 0.01;
-dt_write 60.0;
-dt_force_write 0.01;
+
+// Time step and write
+dt 0.005;
+dt_first_write 60.0;
+dt_write 0.20;
+dt_force_write $dt;
 t_end 60.0;
 
 // Mesh size
