@@ -15,6 +15,11 @@ dt_write 60.0;
 dt_force_write 0.01;
 t_end 60.0;
 
+// Mesh size
+dx_background 0.50;
+n_refine_max 5;
+bl_first_size 1.0e-2;
+
 // Constant parameters
 U_inf 1.0;
 pressure 0;

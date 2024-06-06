@@ -21,7 +21,7 @@ method          simple;
 simpleCoeffs
 {
     // Number of processor blocks in each coordinate direction
-    n           (6 2 1);
+    n           (4 3 1);
 
     // Coefficient of the slight rotation of the mesh to bias the decomposition
     // to be deterministic in the case that the initial block mesh is coordinate

@@ -20,7 +20,7 @@ FoamFile
 ddtSchemes
 {
     #if $transient
-        default         backward;
+        default         CrankNicolson 0.9;
     #else
         default         steadyState;
     #endif
@@ -38,6 +38,8 @@ d2dt2Schemes
 gradSchemes
 {
     default         Gauss linear;
+
+    grad(U)         cellLimited Gauss linear 1;
 }
 
 divSchemes
@@ -45,9 +47,11 @@ divSchemes
     default         none;
 
     #if $transient
-        div(phi,U)      Gauss linearUpwind grad(U);
+        strategy            Gauss limitedLinear 1.0;
+
+        div(phi,U)          Gauss limitedLinearV 1.0;
     #else
-        div(phi,U)      bounded Gauss linearUpwind grad(U);
+        div(phi,U)      bounded Gauss limitedLinear 1.0;
     #endif
 }
 

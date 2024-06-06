@@ -21,11 +21,10 @@ solvers
 {
     p
     {
-        solver          PCG;
-        preconditioner  DIC;
+        solver          GAMG;
+        smoother        GaussSeidel;
         tolerance       1e-06;
-        relTol          0.01;
-        maxIter         1000;
+        relTol          1e-2;
     }
     pFinal
     {
@@ -35,11 +34,10 @@ solvers
 
     U
     {
-        solver          PBiCG;
-        preconditioner  DILU;
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
         tolerance       1e-06;
-        relTol          0.01;
-        maxIter         1000;
+        relTol          1e-2;
     }
     UFinal
     {
@@ -53,7 +51,7 @@ solvers
     {
         nCorrectors                 2;
         nOuterCorrectors            1;
-        nNonOrthogonalCorrectors    1;
+        nNonOrthogonalCorrectors    3;
 
         pRefCell                    0;
         pRefValue                   0;

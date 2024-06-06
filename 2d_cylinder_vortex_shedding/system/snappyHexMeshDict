@@ -14,14 +14,37 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#include        "$FOAM_CASE/include/initialConditions"
+
 castellatedMesh true;
 snap            true;
 addLayers       true;
 
-// Levels of refinements for the trailing zone around the cylinder
-n_refine 4;
+surface_n $n_refine_max;
+
+cyl_1_n $n_refine_max;
+cyl_1_r 1.25;
+
+box_1_n $n_refine_max;
+box_1_x_start 0.0;
+box_1_x_end 1.75;
+box_1_y 1.25;
+
+box_2_n #calc "$n_refine_max - 1";
+box_2_x_end 10.0;
+box_2_y 2.0;
+
+box_3_n #calc "$n_refine_max - 2";
+box_3_x_end 30.0;
+box_3_y 3.0;
+
+box_4_n #calc "$n_refine_max - 3";
+box_4_x_end 100.0;
+box_4_y 4.0;
+
 // Boundary layer levels
-n_boundary 10;
+bl_expansion 1.05;
+bl_n_layers 5;
 
 geometry
 {
@@ -31,11 +54,37 @@ geometry
         name body;
     }
 
-    refinement_box
+    refinement_cylinder_1
+    {
+        type searchableCylinder;
+        point1  (0.0 0.0 0.0);
+        point2  (0.0 0.0 1.0);
+        radius  $cyl_1_r;
+    }
+
+    refinement_box_1
     {
         type searchableBox;
-        min (-2.0 -2.0 0.0);
-        max (8.0 2.0 1.0);
+        min ($box_1_x_start #calc "-$box_1_y" 0.0);
+        max ($box_1_x_end $box_1_y 1.0);
+    }
+    refinement_box_2
+    {
+        type searchableBox;
+        min ($box_1_x_end #calc "-$box_2_y" 0.0);
+        max ($box_2_x_end $box_2_y 1.0);
+    }
+    refinement_box_3
+    {
+        type searchableBox;
+        min ($box_2_x_end #calc "-$box_3_y" 0.0);
+        max ($box_3_x_end $box_3_y 1.0);
+    }
+    refinement_box_4
+    {
+        type searchableBox;
+        min ($box_3_x_end #calc "-$box_4_y" 0.0);
+        max ($box_4_x_end $box_4_y 1.0);
     }
 };
 
@@ -49,14 +98,14 @@ castellatedMeshControls
     minRefinementCells 10;
     maxLoadUnbalance 0.10;
 
-    nCellsBetweenLevels 10;
+    nCellsBetweenLevels 2;
 
     // Explicit feature edge refinement
     features
     (
         {
             file "body.eMesh";
-            level  0;
+            level  $surface_n;
         }
     );
 
@@ -65,7 +114,7 @@ castellatedMeshControls
     {
         body
         {
-            level (1 1);
+            level ($surface_n $surface_n);
         }
     }
 
@@ -76,14 +125,35 @@ castellatedMeshControls
     // Region-wise refinement
     refinementRegions
     {
-        refinement_box
+        refinement_cylinder_1
         {
             mode inside;
-            levels (($n_refine $n_refine));
+            levels (($cyl_1_n $cyl_1_n));
+        }
+
+        refinement_box_1
+        {
+            mode inside;
+            levels (($box_1_n $box_1_n));
+        }
+        refinement_box_2
+        {
+            mode inside;
+            levels (($box_2_n $box_2_n));
+        }
+        refinement_box_3
+        {
+            mode inside;
+            levels (($box_3_n $box_3_n));
+        }
+        refinement_box_4
+        {
+            mode inside;
+            levels (($box_4_n $box_4_n));
         }
     }
 
-    locationInMesh (-2.0 0.0 0.5);
+    locationInMesh (-0.55 0.0 0.5);
     allowFreeStandingZoneFaces true;
 }
 
@@ -132,7 +202,7 @@ addLayersControls
 {
     // Are the thickness parameters below relative to the undistorted
     // size of the refined cell outside layer (true) or absolute sizes (false).
-    relativeSizes true;
+    relativeSizes false;
 
     // Layer thickness specification. This can be specified in one of following
     // ways:
@@ -146,28 +216,28 @@ addLayersControls
     //       mode on a per-patch basis (only the values can be overridden)
 
     // Expansion factor for layer mesh
-    expansionRatio 1.20;
+    expansionRatio $bl_expansion;
 
     // Wanted thickness of the layer furthest away from the wall.
     // If relativeSizes this is relative to undistorted size of cell
     // outside layer.
-    finalLayerThickness 0.9;
+    // finalLayerThickness 0.5;
 
     // Wanted thickness of the layer next to the wall.
     // If relativeSizes this is relative to undistorted size of cell
     // outside layer.
-    // firstLayerThickness 0.3;
+    firstLayerThickness $bl_first_size;
 
     // Wanted overall thickness of layers.
     // If relativeSizes this is relative to undistorted size of cell
     // outside layer.
-    // thickness 0.5
+    // thickness $bl_size;
 
     // Minimum overall thickness of total layers. If for any reason layer
     // cannot be above minThickness do not add layer.
     // If relativeSizes this is relative to undistorted size of cell
     // outside layer.
-    minThickness 0.01;
+    minThickness 1e-6;
 
     // Per final patch (so not geometry!) the layer information
     // Note: This behaviour changed after 21x. Any non-mentioned patches
@@ -178,7 +248,7 @@ addLayersControls
     {
         body
         {
-            nSurfaceLayers $n_boundary;
+            nSurfaceLayers $bl_n_layers;
         }
     }
 
