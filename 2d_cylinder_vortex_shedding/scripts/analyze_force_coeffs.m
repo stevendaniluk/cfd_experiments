@@ -3,6 +3,7 @@
 USAGE={'Usage: octave analyze_force_coeffs.m <forceCoeffs>', ...
 'Options:', ...
 '  -t <t_min> <t_max>: Only considers time on the interval t_min <= t <= t_max', ...
+'  -t_end <dt>: Only considers the final dt seconds', ...
 '', ...
 'Computes the minimum, maximum, and mean Cd and Cl values from the provided forceCoeffs file.'};
 USAGE = sprintf('%s\n',USAGE{:});
@@ -17,6 +18,7 @@ file_path = argv(){1};
 % Extract optional Y axis limits from input arguments
 t_min = -inf;
 t_max = inf;
+t_end = inf;
 
 i = 2;
 while i + 1 <= length(argv())
@@ -24,6 +26,12 @@ while i + 1 <= length(argv())
         t_min = str2double(argv(){i + 1});
         t_max = str2double(argv(){i + 2});
         i = i + 3;
+    elseif strcmp(argv(){i}, '-t_end')
+        t_end = str2double(argv(){i + 1});
+        i = i + 2;
+    else
+        % fprintf('Unrecognized argument: %s\n', argv(){i})
+        i = i + 1;
     end
 end
 
@@ -37,6 +45,11 @@ Cd = data{2}(:, 2);
 Cl = data{2}(:, 3);
 
 % Trim for time range
+if t_end ~= inf
+    t_max = max(t);
+    t_min = t_max - t_end;
+end
+
 indices = and(t >= t_min, t <= t_max);
 t = t(indices);
 Cd = Cd(indices);

@@ -23,14 +23,15 @@ do
    esac
 done
 
+{
 if [ "$MESH" = true  ]
 then
-    rm constant/geometry/*.eMesh
+    rm -f constant/geometry/*.eMesh
     rm -rf constant/extendedFeatureEdgeMesh
     rm -rf constant/polyMesh
     foamListTimes -rm -processor -constant -withZero -withFunctionEntries
 
-    rm log.mesh
+    rm -f log.mesh
 fi
 
 if [ "$SIMULATION" = true  ]
@@ -39,8 +40,8 @@ then
     foamListTimes -rm -processor -withZero -withFunctionEntries
     rm -rf postProcessing
 
-    rm -rf log.solve
-    rm -rf log.solve.analyzed
+    rm -rf log.solve*
 fi
+} > /dev/null
 
 popd > /dev/null

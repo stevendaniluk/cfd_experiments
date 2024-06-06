@@ -16,7 +16,6 @@ if strcmp(argv(){1}, '-h')
 end
 
 data_path = argv(){1};
-file_path = fullfile(data_path, 'postProcessing/forces/0/forceCoeffs.dat');
 
 % Extract optional Y axis limits from input arguments
 Cd_y_lim = [];
@@ -41,7 +40,7 @@ while i + 1 <= length(argv())
         plot_image_name = argv(){i + 1};
         i = i + 2;
     else
-        fprintf('Unrecognized argument: %s\n', argv(){i})
+        % fprintf('Unrecognized argument: %s\n', argv(){i})
         i = i + 1;
     end
 end

@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
-USAGE="Usage: $(basename $0) <OUTPUT_DIR_NAME> <PLOT_FORCE_OPTIONS>
+USAGE="Usage: $(basename $0) <OUTPUT_DIR_NAME> <T_POINT> <PLOT_FORCE_OPTIONS>
 
+T_POINT: postProcessing time point to use
 PLOT_FORCE_OPTIONS: Optional, passes all arguments to the plot_force_coeffs.m script
 
 Saves the following data to results/OUTPUT_DIR_NAME:
@@ -17,14 +18,26 @@ SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]:-$0}"; )" &> /dev/null && 
 pushd $SCRIPT_DIR/.. > /dev/null
 
 OUTPUT_DIR=results/$1
-PLOT_ARGS="${@:2}"
+T_POINT=$2
+PLOT_ARGS="${@:3}"
 
-# Generate plots
-pyFoamPlotWatcher.py log.solve --hardcopy --solver-not-running-anymore --silent
-octave scripts/plot_force_coeffs.m postProcessing/forces/0/forceCoeffs.dat $PLOT_ARGS -s force_coeffs
-
-# Move/copy data to destination
 mkdir -p $OUTPUT_DIR
-mv {cont.png,linear.png,force_coeffs.png} $OUTPUT_DIR/
-cp {log.mesh,log.solve,postProcessing/forces/0/forceCoeffs.dat} $OUTPUT_DIR/
-rm {linear_,cont_}.png
+
+# Logs
+cp {log.mesh,log.solve} $OUTPUT_DIR/
+
+# Solver plots
+pyFoamPlotWatcher.py log.solve --hardcopy --solver-not-running-anymore --silent
+mv {cont.png,linear.png} $OUTPUT_DIR/
+rm {linear_,cont_,bound,bound_}.png
+
+# y+
+cp postProcessing/yPlus/$T_POINT/yPlus.dat $OUTPUT_DIR/
+
+# Force coefficient data and plot
+cp postProcessing/forces/$T_POINT/forceCoeffs.dat $OUTPUT_DIR/
+octave scripts/plot_force_coeffs.m postProcessing/forces/$T_POINT/forceCoeffs.dat $PLOT_ARGS -s force_coeffs
+mv force_coeffs.png $OUTPUT_DIR/
+
+octave scripts/analyze_force_coeffs.m postProcessing/forces/$T_POINT/forceCoeffs.dat $PLOT_ARGS > $OUTPUT_DIR/force_coeffs_range.txt
+
